@@ -1,0 +1,192 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>[StudentName] - [ProjectName] - Obstacles Lesson</title>
+	<style>
+		body 
+		{
+			background-color: #222222;
+			color: #AAAAAA;
+		}
+	</style>
+	<script src="pixi.js"></script>
+	<script src="pipes.js"></script>
+</head>
+<body>
+	<h2>JavaScript Development Project 1.3: Obstacles<h2>
+	<h3>Created by: [Your Name Here]</h3>
+	<center><p id="score">0</p></center>
+    <script>
+
+	//
+    // DO NOT TOUCH
+    //
+	
+	// Creates a new stage. A stage is used to store your game things
+    // like characters and background images. 0x007FFF is the background
+	// color - this is sky blue.
+    var stage = new PIXI.Stage(0x007FFF);
+	
+	// Maintain a list of sprites
+	var allSprites = [];
+	var gameStarted = false;
+	var gameOver = false;
+	
+    // Creates a new renderer. The renderer is responsible for drawing
+    // things, like characters and backgrounds, to screen.
+    var renderer = PIXI.autoDetectRenderer(1280, 720, null);
+
+    // The renderer is automatically inserted into the web page so that
+    // it may be placed in the center and visible to your user.
+    document.body.appendChild(renderer.view);
+    renderer.view.style.position = "absolute";
+    renderer.view.style.left = ((window.innerWidth - renderer.width) / 2) + "px";
+    renderer.view.style.top = ((window.innerHeight - renderer.height) / 2) + "px";
+
+	function regulateSpeed() {
+		for (i = 0; i < allSprites.length; i++)
+		{
+			var sprite = allSprites[i];
+			
+			sprite.Speed.y = Math.max(sprite.Speed.y, -10);
+			sprite.Speed.y = Math.min(sprite.Speed.y,  10);
+		}
+	}
+	
+	function loadStaticSprite(texture, screenWidth, screenHeight, screenPosY, textureHeight, textureScaleX, texturePosY) {
+		var sprite = new PIXI.TilingSprite(texture, screenWidth, screenHeight);
+		sprite.tileScale.y = screenHeight / textureHeight;
+		sprite.tileScale.x = textureScaleX;
+		sprite.position.y = screenPosY;
+		sprite.tilePosition.y = texture.height - texturePosY;
+		sprite.Scroll = new Object();
+		sprite.Scroll.x = 0;
+		sprite.Scroll.y = 0;
+		sprite.Speed = new Object();
+		sprite.Speed.x = 0;
+		sprite.Speed.y = 0;
+		stage.addChild(sprite);
+		return sprite;
+	}
+	
+	function loadSprite(texture, screenHeight, screenPosY, textureHeight, textureScaleX, texturePosY, scrollSpeed) {
+		var sprite = loadStaticSprite(texture, renderer.width, screenHeight, screenPosY, textureHeight, textureScaleX, texturePosY);
+		sprite.Scroll.x = scrollSpeed;
+		allSprites.push(sprite);
+		return sprite;
+	}
+	
+	function loadBirdSprite(texture, screenHeight) {
+		var sprite = loadSprite(texture, screenHeight, renderer.height / 2 - screenHeight / 2, 128, screenHeight / 128, 0, 0);
+		sprite.width = screenHeight;
+		sprite.position.x = renderer.width / 2 - screenHeight / 2;
+		
+		stage.mousedown = stage.touchstart = function()
+		{
+			applyFlap(sprite);
+		}
+		
+		return sprite;
+	}
+	
+	// This function performs a single iteration of the rendering loop.
+	function renderLoopIteration() {
+	    // This function call triggers a future iteration of the rendering loop.
+	    requestAnimFrame(renderLoopIteration);
+
+		// Your update scene function which is responsible moving around your
+		// objects.
+		animateScene();
+		regulateSpeed();
+
+	    // Draws your scene to the screen.
+	    renderer.render(stage);
+	}
+	
+	//
+    // YOUR CODE STARTS HERE
+	//
+	
+	// TODO: remove inner loop code
+	function scrollSprite() {
+	    // Decrement the x-coordinate of your sprites in order to create movement. Sprites that are further back in the scene
+		for (i = 0; i < allSprites.length; i++)
+		{
+			var sprite = allSprites[i];
+			
+			sprite.tilePosition.x -= sprite.Scroll.x;
+			sprite.tilePosition.y -= allSprites[i].Scroll.y;
+		}
+	}
+	
+	// TODO: remove code
+	function applyGravity(bird) {
+		bird.Speed.y -= 0.4;
+		
+		bird.position.y -= bird.Speed.y;
+	}
+	
+	function applyFlap(bird) {
+		if (gameStarted) {
+			bird.Speed.y += 12;
+		}
+		else {
+			gameStarted = true;
+		}
+	}
+	
+	// Load your texture here
+	var backgroundTexture = PIXI.Texture.fromImage("background.png");
+	var birdTexture = PIXI.Texture.fromImage("bird.png");
+	
+	// Load your parallax sprites: ground, distantClouds, nearClouds, distantMountains, nearMountains
+	// ground is provided as a freebie :)
+	
+	var distantMountains = loadSprite(backgroundTexture, 550, 42 , 128, 4.0, 128, 0.1);
+	var nearMountains    = loadSprite(backgroundTexture, 550, 42 , 128, 4.0, 256, 0.8);
+	var distantClouds    = loadSprite(backgroundTexture, 128, 0  , 64 , 1.2, 0  , 1);
+	var nearClouds       = loadSprite(backgroundTexture, 128, 48 , 64 , 1.2, 64 , 3);
+	var ground           = loadSprite(backgroundTexture, 128, 592, 64 , 1.2, 448, 8);
+	
+	var bird = loadBirdSprite(birdTexture, 64);
+	
+	var obstacles = new GameObstacles();
+	obstacles.createObstacle(0);
+	obstacles.createObstacle(1);
+	obstacles.createObstacle(2);
+	obstacles.createObstacle(3);
+	obstacles.createObstacle(4);
+	obstacles.createObstacle(5);
+	obstacles.createObstacle(6);
+	obstacles.createObstacle(7);
+	obstacles.createObstacle(8);
+	obstacles.createObstacle(9);
+	
+	// Video games work by repeatedly making small updates to the scene
+    // and then drawing the scene. Game developers refer to this as the
+    // "rendering loop". This line starts the rendering loop.
+	requestAnimFrame(renderLoopIteration);
+	
+	// Use this function to update the sprite variables you created earlier.
+	function animateScene() {
+		if (gameStarted)
+		{
+			if (!gameOver)
+			{
+				applyGravity(bird);
+				obstacles.advanceObstacles(ground.Scroll.x);
+				
+				gameOver = obstacles.hasCollision(bird);
+			}
+		}
+		
+		if (!gameOver)
+		{
+			scrollSprite();
+		}
+	}
+
+	</script>
+
+	</body>
+</html>
