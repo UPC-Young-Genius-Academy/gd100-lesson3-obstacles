@@ -30,7 +30,10 @@ function GameObstacles() {
 			obstacle.advance(distance, wrapWidth);
 		}
 		
-		this.distance += distance;
+		if (this.allObstacles.length > 3)
+		{
+			this.distance += distance;
+		}
 	};
 	
 	this.createObstacle = function(openning) {
@@ -40,6 +43,11 @@ function GameObstacles() {
 	};
 	
 	this.hasCollision = function(bird) {
+		if (bird.position.y <= 0 || bird.position.y + bird.height >= renderer.height)
+		{
+			return true;
+		}
+		
 		for (i = 0; i < this.allObstacles.length; i++) {
 			var obstacle = this.allObstacles[i];
 			if (obstacle.hasCollision(bird)) {
@@ -52,12 +60,6 @@ function GameObstacles() {
 		this.score = Math.max(0, Math.floor((this.distance - (renderer.width + 200 - OBSTACLE_GAP)) / OBSTACLE_GAP));
 		
 		document.getElementById("score").innerHTML = this.score;
-		if (oldScore != this.score)
-		{
-			score.value = this.score;
-			//var scoreElement = document.getElementById("score");
-			//scoreElement.value = this.score;
-		}
 		
 		return false;
 	};

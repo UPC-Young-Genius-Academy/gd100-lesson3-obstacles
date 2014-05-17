@@ -107,7 +107,6 @@
     // YOUR CODE STARTS HERE
 	//
 	
-	// TODO: remove inner loop code
 	function scrollSprite() {
 	    // Decrement the x-coordinate of your sprites in order to create movement. Sprites that are further back in the scene
 		for (i = 0; i < allSprites.length; i++)
@@ -151,16 +150,12 @@
 	var bird = loadBirdSprite(birdTexture, 64);
 	
 	var obstacles = new GameObstacles();
-	obstacles.createObstacle(0);
-	obstacles.createObstacle(1);
-	obstacles.createObstacle(2);
-	obstacles.createObstacle(3);
-	obstacles.createObstacle(4);
-	obstacles.createObstacle(5);
-	obstacles.createObstacle(6);
-	obstacles.createObstacle(7);
-	obstacles.createObstacle(8);
-	obstacles.createObstacle(9);
+	
+	// TODO: Introduce 5 or more obstacles by invoking the createObstacle function.
+	// 		 createObstacle uses 1 parameter, this parameter determines where the gap is placed between the pipes.
+	//		 use a value from 0 to 9 - 0 corresponds to the upper most placement and 9 is the lower most.
+	//		 example of placing a pipe with an obstacle with a whole near the middle.
+	// obstacles.createObstacle(5);
 	
 	// Video games work by repeatedly making small updates to the scene
     // and then drawing the scene. Game developers refer to this as the
@@ -171,15 +166,16 @@
 	function animateScene() {
 		if (gameStarted)
 		{
-			if (!gameOver)
-			{
-				applyGravity(bird);
-				obstacles.advanceObstacles(ground.Scroll.x);
-				
-				gameOver = obstacles.hasCollision(bird);
-			}
+			applyGravity(bird);
+		
+			// TODO: Introduce an if statement that prevents these two lines of code from
+			// 		 running after the game is over. See the (no-scroll) example below to 
+			//		 get an idea on how to do this.
+			obstacles.advanceObstacles(ground.Scroll.x);
+			gameOver |= obstacles.hasCollision(bird);
 		}
 		
+		// Example (no-scroll): an if statement is used to prevent sprite scrolling (parallax) after the game is over.
 		if (!gameOver)
 		{
 			scrollSprite();
